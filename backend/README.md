@@ -125,6 +125,45 @@ npm start
 
 Se tudo deu certo, você verá uma mensagem do NestJS no terminal. Sua API já está no ar em `http://localhost:3000`.
 
+## 🧪 Testes Automatizados
+
+Para garantir a qualidade e a estabilidade do código, o projeto conta com uma suíte de testes automatizados utilizando Jest.
+
+### Testes Unitários
+
+Testam as menores partes do sistema (as "unidades"), como os métodos do `Service` e do `Controller`, de forma totalmente isolada. Usamos "mocks" (dublês) para simular dependências como o banco de dados, garantindo que a **lógica de negócio** está correta sem tocar no banco de dados de verdade.
+
+### Testes de Ponta a Ponta (E2E)
+
+Eles simulam o fluxo completo, como se um usuário estivesse fazendo requisições HTTP reais. Os testes E2E iniciam a aplicação inteira e se conectam a um **banco de dados de teste local** para validar se todos os componentes (Controller, Service, Banco) estão conversando entre si corretamente.
+
+**Configurando o Banco de Testes E2E (Obrigatório)**
+
+Os testes E2E precisam de um banco de dados separado para não interferir com seus dados de desenvolvimento.
+
+1.  Seguindo os mesmos passos da **Opção 2** acima, crie um **segundo banco de dados local** no MongoDB Compass com o nome `lawgic_db_test`. (Você não precisa criar o usuário de novo, pois ele já tem acesso a todos os bancos).
+2.  Caso você mude o nome do banco ou queira outro usuário, mo arquivo `package.json`, modifique a seguinte linha com a URL correspondente para este novo banco:
+    ```
+    mongodb://admin:admin@localhost:27017/lawgic_db_Teste?authSource=admin jest--config ./test/jest-e2e.json"
+    ```
+
+  
+
+### Rodando os Testes
+
+Com tudo configurado, use os seguintes comandos na pasta `backend`:
+
+```bash
+# Roda apenas os testes unitários (rápidos e não usam banco)
+npm run test
+
+# Roda apenas os testes E2E (usando o banco de testes local)
+npm run test:e2E
+
+# Roda TODOS os testes e gera um relatório de cobertura
+npm run test:cov
+```
+
 ## 🔌 Documentação Interativa da API (Swagger)
 
 Este projeto utiliza o Swagger (OpenAPI) para gerar uma documentação da API completa e interativa. Com ela, você pode ver todos os endpoints disponíveis, seus parâmetros, e até mesmo **testar a API diretamente pelo navegador**.

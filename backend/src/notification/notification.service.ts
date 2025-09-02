@@ -13,8 +13,7 @@ export class NotificationService {
 
     // Criando uma notificação
     async create(createDto: CreateNotificationDto): Promise<NotificationDocument> {
-        const createdNotification = new this.notificationModel(createDto)
-        return createdNotification.save()
+        return this.notificationModel.create(createDto)
     }
 
     // Buscar todas as notificações, com busca por status opicional
@@ -35,7 +34,7 @@ export class NotificationService {
     }
 
     // Atualiza com dados do notificado
-    async updateNotifiedInfo(id: string, updateDto: UpdateNotifiedInfoDto): Promise<Notification> {
+    async updateNotifiedInfo(id: string, updateDto: UpdateNotifiedInfoDto): Promise<NotificationDocument> {
         const notification = await this.findOne(id)
 
         // Atualiza os campos do DTO
@@ -46,11 +45,11 @@ export class NotificationService {
     }
 
     // Valida a notificação
-    async validate(id: string, validateDto: ValidateNotificationDto): Promise<Notification> {
+    async validate(id: string, validateDto: ValidateNotificationDto): Promise<NotificationDocument> {
         const notification = await this.findOne(id)
 
         if (notification.status !== NotificationStatus.VALIDACAO) {
-            throw new BadRequestException(`Notification is not in VALIDAÇÃO status.`)
+            throw new BadRequestException('A notificação não está no status de VALIDAÇÃO.')
         }
 
         if (validateDto.needs_more_info) {
