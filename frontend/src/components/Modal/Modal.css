@@ -21,8 +21,6 @@
   width: 100%;
   max-width: 550px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  max-height: 85vh;
-  overflow-y: auto;
 }
 
 /* Cabeçalho do Modal */

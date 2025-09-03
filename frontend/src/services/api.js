@@ -24,16 +24,4 @@ export const createNotification = async (data) => {
   return response.data
 }
 
-// Rota para atualizar notificação
-export const updateNotifiedInfo = async (id, data) => {
-  const response = await api.patch(`/notifications/${id}/notified-info`, data)
-  return response.data
-}
-
-// Rota para aprovar ou declinar notificação
-export const validateNotification = async (id, data) => {
-  const response = await api.patch(`/notifications/${id}/validate`, data)
-  return response.data
-}
-
 export default api

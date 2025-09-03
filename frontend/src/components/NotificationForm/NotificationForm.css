@@ -7,20 +7,6 @@
   font-weight: 500;
 }
 
-.form-divider {
-  border: none;
-  border-top: 1px solid #444;
-  margin: 16px 0;
-}
-
-.form-subtitle {
-  color: #bdbdbd;
-  font-size: 16px;
-  font-weight: 500;
-  margin-top: 0;
-  margin-bottom: 8px;
-}
-
 /* Formulário e seus grupos */
 .notification-form {
   display: flex;
