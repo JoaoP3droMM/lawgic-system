@@ -1,4 +1,4 @@
-# Lawgic - Desafio Técnico Fullstack Júnior
+# Lawgic - Backend
 
 Uma API REST feita com NestJS para gerenciar o fluxo de Notificações Judiciais.
 
@@ -40,10 +40,6 @@ Bora lá, sem mistério. Pra ter essa API funcionando na sua máquina, é só se
 - Um cliente de API, tipo o [Postman](https://www.postman.com/) ou [Insomnia](https://insomnia.rest/), pra brincar com os endpoints.
 
 ### 2. Preparando o Terreno
-
-```bash
-# Primeiro, clona o projeto pra sua máquina
-git clone [https://github.com/JoaoP3droMM/lawgic-system.git](https://github.com/seu-usuario/seu-repositorio.git)
 
 # Entra na pasta do backend
 cd seu-repositorio/backend
