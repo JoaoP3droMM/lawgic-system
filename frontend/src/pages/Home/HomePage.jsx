@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import CustomCheckBox from '../../components/CustomCheckBox'
 import NotificationForm from '../../components/NotificationForm/NotificationForm'
 import Modal from '../../components/Modal/Modal'
-import { getNotifications, getNotificationById, createNotification } from '../../services/api'
+import { getNotifications, createNotification, updateNotifiedInfo, getNotificationById, validateNotification } from '../../services/api'
 
 import './HomePage.css'
 
@@ -13,59 +13,68 @@ export default function HomePage() {
   const [error, setError] = useState(null)
 
   // Estados para controlar o modal
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState('create')
+  const [modalMode, setModalMode] = useState(null)
   const [selectedNotification, setSelectedNotification] = useState(null)
   const [refetchTrigger, setRefetchTrigger] = useState(false)
 
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const data = await getNotifications(selectedFilter)
+      setNotifications(data)
+    } catch (err) {
+      setError('Falha ao buscar as notificações. Verifique se o backend está rodando.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Faz a busca pelos dados na API
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        
-        // Passa o filtro selecionado para a função da API.
-        const data = await getNotifications(selectedFilter)
-        setNotifications(data)
-
-      } catch (err) {
-        setError('Falha ao buscar as notificações. Verifique se o backend está rodando.')
-        console.error(err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchNotifications()
   }, [refetchTrigger, selectedFilter])
 
-  const handleCreateClick = () => {
-    setModalMode('create')
-    setSelectedNotification(null)
-    setIsModalOpen(true)
-  }
-
-  const handleViewClick = async (id) => {
-    try {
-      const data = await getNotificationById(id)
-      setModalMode('view')
-      setSelectedNotification(data)
-      setIsModalOpen(true)
-    } catch (err) {
-      alert('Erro ao buscar detalhes da notificação.')
-      console.error(err)
+  const handleActionClick = async (notification) => {
+    let mode
+    switch (notification.status) {
+      case 'EM_ANDAMENTO':
+        mode = 'updateInfo'
+        break
+      case 'VALIDACAO':
+        mode = 'validate'
+        break
+      default:
+        mode = 'view'
     }
+    setSelectedNotification(notification)
+    setModalMode(mode)
   }
 
   const handleFormSubmit = async (e, formData) => {
     e.preventDefault()
     try {
-      await createNotification(formData)
-      setIsModalOpen(false)
-      setRefetchTrigger(prev => !prev)
+      if (modalMode === 'create') {
+        await createNotification(formData)
+      } else if (modalMode === 'updateInfo') {
+        await updateNotifiedInfo(selectedNotification._id, formData)
+      }
+      setModalMode(null)
+      fetchNotifications()
     } catch (err) {
-      alert('Erro ao criar notificação.')
+      alert('Erro ao salvar os dados.')
+      console.error(err)
+    }
+  }
+
+  const handleValidate = async (shouldReject) => {
+    try {
+      await validateNotification(selectedNotification._id, { needs_more_info: shouldReject })
+      setModalMode(null)
+      fetchNotifications()
+    } catch (err) {
+      alert('Erro ao validar a notificação.')
       console.error(err)
     }
   }
@@ -82,22 +91,30 @@ export default function HomePage() {
     if (error) return <tr><td colSpan={4} className='message-cell error-cell'>{error}</td></tr>
     if (notifications.length === 0) return <tr><td colSpan={4} className='message-cell'>Nenhuma notificação encontrada.</td></tr>
 
-    return notifications.map((notification) => (
-      <tr key={notification._id}>
-        <td>{notification.titulo}</td>
-        <td>{notification.descricao}</td>
-        <td>{notification.nome_notificado || '---'}</td>
-        <td>
-          <span className={`status-badge status-${notification.status.toLowerCase()}`}>
-            {notification.status.replace('_', ' ')}
-          </span>
-        </td>
-        <td>{formatDate(notification.data_audiencia)}</td>
-        <td>
-          <button className='action-button' onClick={() => handleViewClick(notification._id)}>Visualizar</button>
-        </td>
-      </tr>
-    ))
+    return notifications.map((notification) => {
+      const actionText = {
+        EM_ANDAMENTO: 'Preencher Dados',
+        VALIDACAO: 'Validar',
+        CONCLUIDO: 'Visualizar',
+      }[notification.status]
+
+      return(
+        <tr key={notification._id}>
+          <td>{notification.titulo}</td>
+          <td>{notification.descricao}</td>
+          <td>{notification.nome_notificado || '---'}</td>
+          <td>
+            <span className={`status-badge status-${notification.status.toLowerCase()}`}>
+              {notification.status.replace('_', ' ')}
+            </span>
+          </td>
+          <td>{formatDate(notification.data_audiencia)}</td>
+          <td>
+            <button className='action-button' onClick={() => handleActionClick(notification)}>{actionText}</button>
+          </td>
+        </tr>
+      )
+    })
   }
 
 
@@ -105,7 +122,7 @@ export default function HomePage() {
     <div className='home-container'>
       <header className='header-section'>
         <h1>Notificações Judiciais</h1>
-        <button className='create-button' onClick={handleCreateClick}>
+        <button className='create-button' onClick={() => setModalMode('create')}>
           {/* SVG para o ícone de 'criar' */}
           <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M12 5v14M5 12h14'></path></svg>
           Criar Nova Notificação
@@ -149,12 +166,13 @@ export default function HomePage() {
           </tbody>
         </table>
       </main>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={!!modalMode} onClose={() => setModalMode(null)}>
         <NotificationForm
           mode={modalMode}
           initialData={selectedNotification}
           onSubmit={handleFormSubmit}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setModalMode(false)}
+          onValidate={handleValidate}
         />
       </Modal>
     </div>

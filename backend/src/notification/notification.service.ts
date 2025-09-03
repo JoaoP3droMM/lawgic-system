@@ -14,8 +14,8 @@ export class NotificationService {
     // Criando uma notificação
     async create(createDto: CreateNotificationDto): Promise<NotificationDocument> {
         const notificationData = {
-            ...createDto,
-            status: NotificationStatus.EM_ANDAMENTO, 
+        ...createDto,
+        status: NotificationStatus.EM_ANDAMENTO,
         }
         return this.notificationModel.create(notificationData)
     }
