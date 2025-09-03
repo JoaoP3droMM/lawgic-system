@@ -38,7 +38,7 @@ export default function HomePage() {
     }
 
     fetchNotifications()
-  }, [refetchTrigger])
+  }, [refetchTrigger, selectedFilter])
 
   const handleCreateClick = () => {
     setModalMode('create')
@@ -85,6 +85,8 @@ export default function HomePage() {
     return notifications.map((notification) => (
       <tr key={notification._id}>
         <td>{notification.titulo}</td>
+        <td>{notification.descricao}</td>
+        <td>{notification.nome_notificado || '---'}</td>
         <td>
           <span className={`status-badge status-${notification.status.toLowerCase()}`}>
             {notification.status.replace('_', ' ')}
@@ -135,6 +137,8 @@ export default function HomePage() {
           <thead>
             <tr>
               <th>Título</th>
+              <th>Descrição</th>
+              <th>Notificado (Nome)</th>
               <th>Status</th>
               <th>Data da Audiência</th>
               <th>Ações</th>
@@ -145,11 +149,7 @@ export default function HomePage() {
           </tbody>
         </table>
       </main>
-      <Modal
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false) }
-        title={modalMode === 'create' ? 'Criar Nova Notificação' : 'Detalhes da Notificação'}
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <NotificationForm
           mode={modalMode}
           initialData={selectedNotification}

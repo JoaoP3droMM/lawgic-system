@@ -13,7 +13,11 @@ export class NotificationService {
 
     // Criando uma notificação
     async create(createDto: CreateNotificationDto): Promise<NotificationDocument> {
-        return this.notificationModel.create(createDto)
+        const notificationData = {
+            ...createDto,
+            status: NotificationStatus.EM_ANDAMENTO, 
+        }
+        return this.notificationModel.create(notificationData)
     }
 
     // Buscar todas as notificações, com busca por status opicional
